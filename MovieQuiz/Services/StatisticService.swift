@@ -3,7 +3,7 @@ import UIKit
 
 protocol StatisticService {
     func store(currentRound: Round)
-    var totalAccuracy: Double { get }
+    var totalAccuracy: String { get }
     var gamesCount : Int { get }
     var bestGame: GameRecord { get }
 }

@@ -17,10 +17,8 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, R
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        // настраиваем внешний вид рамки
         setupImageView()
         alertPresenter.delegate = self
-        // стартуем новый раунд
         startNewRound()
     }
     
@@ -80,10 +78,8 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, R
     }
     
     private func showQuestionAnswerResult(isCorrect: Bool) {
-        UIView.animate(withDuration: 0.5, animations: { [weak self] in
-            self?.imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        })
-    }
+        self.imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        }
     
     // MARK: - IBActions
     @IBAction private func noButtonClicked(_ sender: UIButton) {
@@ -117,7 +113,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, R
         }
         
         let gamesCount = model?.gamesCount ?? 0
-        let gamesAccuracy = model?.totalAccuracy ?? 0.0
+        let gamesAccuracy = model?.totalAccuracy ?? "0.0"
         
         let correctAnswers = currentRound?.getCorrectCountAnswer() ?? 0
         let totalQuestions = currentRound?.getCountQuestions() ?? 0

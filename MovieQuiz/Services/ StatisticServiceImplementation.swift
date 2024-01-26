@@ -28,9 +28,11 @@ final class StatisticServiceImplementation: StatisticService {
         }
     }
     
-    var totalAccuracy: Double {
-        Double(correct) / Double(total) * 100
+    var totalAccuracy: String {
+        let accuracy = Double(correct) / Double(total) * 100
+        return String(format: "%.2f", accuracy)
     }
+
     
     
     var gamesCount: Int {
