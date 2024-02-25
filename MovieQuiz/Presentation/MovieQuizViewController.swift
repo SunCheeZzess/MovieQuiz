@@ -1,18 +1,27 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, RoundDelegate {
+final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, RoundDelegate, QuestionFactoryDelegate {
+    func loadData() {
+        <#code#>
+    }
     
+
+
     // MARK: - IBOutlets
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private var textLabel: UILabel!
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var noButton: UIButton!
     @IBOutlet weak var yesButton: UIButton!
+    
+
     
     // MARK: - Private Properties
     private let alertPresenter = AlertPresenter()
     private var currentRound: Round?
     private var statisticService: StatisticService?
+    private let moviesLoader = MoviesLoader()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -20,6 +29,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, R
         setupImageView()
         alertPresenter.delegate = self
         startNewRound()
+        showLoadingIndicator()
     }
     
     // MARK: - Setup Methods
@@ -37,7 +47,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, R
     // MARK: - Quiz Logic
     private func startNewRound() {
         setAnswerButtonsEnabled(true)
-        currentRound = Round()
+        currentRound = Round(moviesLoader: moviesLoader, delegate: self)
         currentRound?.delegate = self
         currentRound?.requestNextQuestion()
     }
@@ -57,12 +67,33 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, R
         showQuizResults()
     }
     
+
+    
     // MARK: - AlertPresenterDelegate
     func alertDidDismiss() {
         startNewRound()
     }
     
+    //MARK: Checking NetworkErrors
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
+
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true
+        currentRound?.requestNextQuestion()
+    }
+    
     // MARK: - UI Updates
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        textLabel.text = question?.text
+        if let imageData = question?.image {
+            imageView.image = UIImage(data: imageData)
+        } else {
+            imageView.image = nil
+        }
+        counterLabel.text = "\(currentRound?.getNumberCurrentQuestion() ?? 0) / \(currentRound?.getCountQuestions() ?? 0)"
+    }
     private func showQuizResults() {
         let model1 = statisticService
         let alertModel1 = convert1(model: model1)
@@ -101,7 +132,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, R
         let displayNumber = questionNumber + 1
         
         return QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(displayNumber) / \(totalQuestions)"
         )
@@ -130,10 +161,38 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate, R
             Рекорд: \(recordCorrect) / \(recordTotal) (\(recordDate.dateTimeString))
             Средняя точность: \(gamesAccuracy)%
             """,
-            buttonText: "Сыграть еще раз"
+            buttonText: "Сыграть ещё раз"
         )
         
         return alertModel
+    }
+    
+    // MARK: AlertNetworkError
+    
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        
+        let model = AlertModel(title: "Ошибка",
+                               message: message,
+                               buttonText: "Попробовать ещё раз")
+        
+        self.currentRound?.currentQuestionIndex = 0
+        self.currentRound?.correctAnswersCount = 0
+        self.currentRound?.requestNextQuestion()
+        
+        alertPresenter.present(alertModel: model, on: self)
+    }
+    
+    // MARK: Indicator Methods
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.stopAnimating()
+        activityIndicator.isHidden = true
     }
     
     // MARK: Service Methods
