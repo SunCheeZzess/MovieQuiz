@@ -66,7 +66,7 @@ final class StatisticServiceImplementation: StatisticService {
         }
     }
     
-    func store(currentRound: Round) {
+    func store(currentRound: RoundCoordinator) {
         guard let currentGameRecord = currentRound.getGameRecord() else {
             return
         }

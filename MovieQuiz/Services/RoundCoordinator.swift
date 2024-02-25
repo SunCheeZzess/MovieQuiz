@@ -1,22 +1,36 @@
 import UIKit
 
-class Round: QuestionFactoryDelegate {
-    
-
+final class RoundCoordinator: QuestionFactoryDelegate {
     //MARK: - Properties
-    weak var delegate: RoundDelegate?
-    private let questionFactory: QuestionFactory
-    private var currentQuestion: QuizQuestion?
+    var correctAnswersCount = 0
+    var currentQuestionIndex = 0
+    
+    weak var delegate: RoundCoordinatorDelegate?
+    
+    private let statisticService: StatisticService
+    private let questionFactory: QuestionFactoryProtocol
+    
     private var questionCount = 10
     private var gameRecord: GameRecord?
-    var currentQuestionIndex: Int = 0
-    var correctAnswersCount: Int = 0
+    private var currentQuestion: QuizQuestion?
     
-    //MARK: - Initialization
-    init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate?) {
-         self.questionFactory = QuestionFactory(moviesLoader: moviesLoader, delegate: delegate)
-         self.questionFactory.delegate = self
-         self.questionFactory.requestNextQuestion()
+    //MARK: - Init
+    init(
+        questionFactory: QuestionFactory,
+        statisticService : StatisticService
+    ) {
+        self.questionFactory = questionFactory
+        self.statisticService = statisticService
+        questionFactory.delegate = self
+    }
+    
+    // MARK: - QuestionFactoryDelegate
+    func didLoadDataFromServer() {
+        delegate?.didLoadFilmsData()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        delegate?.didFailLoadFilmData(with: error)
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -28,10 +42,11 @@ class Round: QuestionFactoryDelegate {
             finishRound()
         }
     }
-    
-    
-    
+
     // MARK: - Methods
+    func loadFilmsData() {
+        questionFactory.loadData()
+    }
     
     func requestNextQuestion() {
         questionFactory.requestNextQuestion()
