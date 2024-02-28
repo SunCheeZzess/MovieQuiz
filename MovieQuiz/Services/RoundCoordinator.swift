@@ -4,17 +4,18 @@ class Round: QuestionFactoryDelegate {
     
     //MARK: - Properties
     weak var delegate: RoundDelegate?
-    private let questionFactory = QuestionFactory()
+    private let questionFactory: QuestionFactory
     private var currentQuestion: QuizQuestion?
-    private var currentQuestionIndex: Int = 0
-    private var correctAnswersCount: Int = 0
     private var questionCount = 10
     private var gameRecord: GameRecord?
+    var currentQuestionIndex: Int = 0
+       var correctAnswersCount: Int = 0
     
     //MARK: - Initialization
-    init() {
-        questionFactory.delegate = self
-        questionFactory.requestNextQuestion()
+    init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate?) {
+        self.questionFactory = QuestionFactory(moviesLoader: moviesLoader, delegate: delegate)
+        self.questionFactory.delegate = self
+        self.questionFactory.requestNextQuestion()
     }
     
     // MARK: - QuestionFactoryDelegate
