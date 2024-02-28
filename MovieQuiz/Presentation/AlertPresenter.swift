@@ -12,5 +12,7 @@ class AlertPresenter {
         }
         alert.addAction(action)
         viewController.present(alert, animated: true, completion: nil)
+        action.accessibilityLabel = "Action Button"
+ viewController.view.accessibilityIdentifier = "alert"
     }
 }
