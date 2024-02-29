@@ -3,14 +3,19 @@
 import UIKit
 
 class AlertPresenter {
-    weak var delegate: AlertPresenterDelegate?
 
-    func present(alertModel: AlertModel, on viewController: UIViewController) {
-        let alert = UIAlertController(title: alertModel.title, message: alertModel.message, preferredStyle: .alert)
-        let action = UIAlertAction(title: alertModel.buttonText, style: .default) { [weak self] _ in
-            self?.delegate?.alertDidDismiss()
+    func show(in vc: UIViewController, model: AlertModel) {
+        let alert = UIAlertController(
+            title: model.title,
+            message: model.message,
+            preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: model.buttonText, style: .default){ _ in
+            model.completion()
         }
+        
         alert.addAction(action)
-        viewController.present(alert, animated: true, completion: nil)
+        
+        vc.present(alert, animated: true, completion: nil)
     }
 }
